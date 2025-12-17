@@ -1,67 +1,82 @@
 <?php
-// api.php - Backend Servisi
-require_once 'config.php';
-
+require 'config.php';
 header('Content-Type: application/json');
-// CORS (Farklı portlardan erişim için - Opsiyonel ama iyi bir pratiktir)
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
+$key = "vault_jwt_key";
 
-$action = $_GET['action'] ?? '';
+// --- YARDIMCILAR ---
+function logAct($u, $act, $st) { try { getDB()->insert("access_logs", ["username"=>$u, "action"=>$act, "status"=>$st, "ip_address"=>$_SERVER['REMOTE_ADDR']]); } catch(e){} }
+function sign($d){ global $key; $d['ip']=$_SERVER['REMOTE_ADDR']; return base64_encode(json_encode($d)).'.'.hash_hmac('sha256',base64_encode(json_encode($d)),$key); }
+function verify($t){ global $key; @list($p,$s)=explode('.',$t); if(hash_hmac('sha256',$p,$key)!==$s)return false; $d=json_decode(base64_decode($p),true); if($d['ip']!==$_SERVER['REMOTE_ADDR'])return false; return $d; }
 
-// --- 1. GİRİŞ (LOGIN) ---
-if ($action === 'login') {
-    // Postman'den veya Axios'tan gelen JSON verisini al
-    $input = json_decode(file_get_contents('php://input'), true);
-    $username = $input['username'] ?? '';
-    $password = $input['password'] ?? '';
+// Veritabanındaki şifreyi çözme fonksiyonu (Sadece API yapabilir)
+function decryptDB($data) { return openssl_decrypt($data, 'AES-128-ECB', 'gizli_db_anahtari'); }
 
+$in = json_decode(file_get_contents('php://input'), true);
+$act = $_GET['action'] ?? '';
+
+// 1. GİRİŞ
+if ($act === 'login') {
     $db = getDB();
-    $user = $db->get("users", "*", ["username" => $username]);
-
-    if ($user && password_verify($password, $user['password'])) {
-        echo json_encode([
-            'status' => 'success',
-            'token' => createToken(['sub' => $username, 'role' => $user['role'], 'exp' => time() + TOKEN_EXPIRY]),
-            'role' => $user['role']
-        ]);
+    $u = $db->get("users", "*", ["username" => $in['username']]);
+    if ($u && $u['password'] === $in['password']) {
+        logAct($u['username'], 'LOGIN', 'SUCCESS');
+        echo json_encode(['status'=>'success', 'token'=>sign(['sub'=>$u['username'], 'role'=>$u['role']]), 'role'=>$u['role']]);
     } else {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'message' => 'Hatalı bilgiler.']);
+        logAct($in['username'], 'LOGIN', 'FAILED');
+        echo json_encode(['status'=>'error']);
     }
     exit;
 }
 
-// --- 2. TOKEN DOĞRULAMA (Middleware) ---
-$headers = getallheaders();
-$auth = $headers['Authorization'] ?? '';
+// TOKEN KONTROL
+$claims = verify(str_replace('Bearer ', '', getallheaders()['Authorization'] ?? ''));
+if (!$claims) { http_response_code(401); echo json_encode(['status'=>'error']); exit; }
+$user = $claims['sub']; $role = $claims['role'];
 
-if (!preg_match('/Bearer\s+(.*)/i', $auth, $matches)) {
-    http_response_code(401); 
-    echo json_encode(['status' => 'error', 'message' => 'Token yok.']); 
+// 2. KASA LİSTESİ (Şifreler GİZLİ Gider - Maskelenmiş)
+if ($act === 'get_vault') {
+    $db = getDB();
+    // Listeyi çekerken şifreleri asla göndermiyoruz, sadece yıldız gönderiyoruz
+    // Ancak Zero Trust gereği, Stajyer CRITICAL olanın varlığını bile görmemeli (Scoping)
+    
+    if ($role === 'intern') {
+        $data = $db->select("vault", ["id","service_name","username_login","sensitivity","icon"], ["sensitivity" => "LOW"]);
+    } elseif ($role === 'tech') {
+        $data = $db->select("vault", ["id","service_name","username_login","sensitivity","icon"], ["sensitivity" => ["LOW", "HIGH"]]);
+    } else {
+        $data = $db->select("vault", ["id","service_name","username_login","sensitivity","icon"]); // Admin hepsi
+    }
+    
+    // Şifre alanı boş veya maskeli gider
+    foreach($data as &$row) { $row['password_display'] = '••••••••••••'; }
+    
+    echo json_encode(['status'=>'success', 'data'=>$data]);
     exit;
 }
 
-$payload = verifyToken($matches[1]);
-if (!$payload) {
-    http_response_code(401); 
-    echo json_encode(['status' => 'error', 'message' => 'Geçersiz Token.']); 
+// 3. ŞİFREYİ GÖSTER (Reveal Password)
+if ($act === 'reveal') {
+    $id = $in['id'];
+    $db = getDB();
+    $item = $db->get("vault", "*", ["id" => $id]);
+
+    // YETKİ KONTROLÜ
+    $allowed = false;
+    if ($item['sensitivity'] === 'LOW') $allowed = true;
+    elseif ($item['sensitivity'] === 'HIGH' && ($role === 'tech' || $role === 'admin')) $allowed = true;
+    elseif ($item['sensitivity'] === 'CRITICAL' && $role === 'admin') $allowed = true;
+
+    if ($allowed) {
+        // Veritabanındaki şifreli veriyi çöz
+        $realPass = decryptDB($item['encrypted_pass']);
+        
+        logAct($user, "REVEAL_{$item['service_name']}", 'AUTHORIZED');
+        echo json_encode(['status'=>'success', 'password'=>$realPass]);
+    } else {
+        logAct($user, "ATTACK_{$item['service_name']}", 'BLOCKED');
+        http_response_code(403);
+        echo json_encode(['status'=>'error', 'message'=>'BU ŞİFREYİ GÖRME YETKİNİZ YOK!']);
+    }
     exit;
 }
-
-// --- 3. YETKİ KONTROLÜ ---
-$required = $access_policies[$action] ?? [];
-if (empty($required) || !in_array($payload['role'], $required)) {
-    http_response_code(403); 
-    echo json_encode(['status' => 'error', 'message' => 'Yetkiniz yok.']); 
-    exit;
-}
-
-// --- 4. SONUÇ ---
-$msgs = [
-    'view' => "Veriler başarıyla çekildi (View).",
-    'edit' => "Kayıt düzenlendi (Edit).",
-    'admin' => "Admin paneli açıldı.",
-];
-echo json_encode(['status' => 'success', 'data' => $msgs[$action]]);
 ?>

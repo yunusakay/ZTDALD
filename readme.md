@@ -6,4 +6,3 @@ Alpine.js
 Config.php
 SQLLite
 AXIOS for API requests
-Changing to test to github.
