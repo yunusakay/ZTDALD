@@ -24,9 +24,9 @@ return [
             'lifetime' => 7200, // 2 hours
         ],
         'vault' => [
-            'key' => 'b7f3c9e2a1d8f6e5c4b3a2d1e0f9c8b7a6d5e4f3c2b1a0d9e8f7c6b5a4d3e2', // Randomly generated
+            'key' => 'eff9ff5e82def6e985f1888ad6965d44',
             'cipher' => 'AES-256-CBC',
-            'iv' => 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6', // Randomly generated
+            'iv' => '4e32b6c1c09a3445',
         ],
         'rate_limiting' => [
             'login_attempts' => 5, // Max login attempts

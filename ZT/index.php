@@ -131,7 +131,7 @@ if ($user && isset($_POST['add_vault'])) {
                 'message' => 'Kullanıcı adı geçersiz (sadece harf, rakam, -_.@ karakterleri)'
             ],
             'pass' => [
-                'type' => 'string',
+                'type' => 'password',
                 'required' => true,
                 'min_length' => 4,
                 'message' => 'Şifre en az 4 karakter olmalıdır'
@@ -325,6 +325,12 @@ if ($user && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_vault
             'required' => true,
             'max_length' => 100,
             'message' => 'Kullanıcı adı geçersiz (sadece harf, rakam, -_.@ karakterleri)'
+        ],
+        'new_password' => [
+            'type' => 'password',
+            'required' => false,
+            'min_length' => 4,
+            'message' => 'Yeni şifre en az 4 karakter olmalıdır'
         ],
         'sensitivity' => [
             'type' => 'string',
