@@ -42,14 +42,14 @@ CREATE TABLE IF NOT EXISTS zt_vault (
 );
 
 INSERT INTO l_users (username, password, role) VALUES
-('admin', '1', 'admin'),
-('tech',  '1', 'tech'),
-('intern','1','intern');
+('admin', '1234', 'admin'),
+('tech',  '1234', 'tech'),
+('intern','1334','intern');
 
 INSERT INTO zt_users (username, password, role) VALUES
-('admin', '1', 'admin'),
-('tech',  '1', 'tech'),
-('intern','1','intern');
+('admin', '1234', 'admin'),
+('tech',  '1234', 'tech'),
+('intern','1234','intern');
 ```
 
 Legacy: `http://localhost/ZTAL/L/index.php`

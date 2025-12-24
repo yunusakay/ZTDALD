@@ -9,14 +9,14 @@ return [
         ],
         'session' => [
             'name' => 'ztal_session',
-            'lifetime' => 0, // Until browser close
+            'lifetime' => 0, // Session expires when browser closes
             'path' => '/',
             'domain' => '',
             'secure' => isset($_SERVER['HTTPS']), // Auto-detect HTTPS
             'httponly' => true,
             'samesite' => 'Lax',
             'regenerate_seconds' => 900, // 15 minutes
-            'idle_timeout_seconds' => 1800, // 30 minutes
+            'idle_timeout_seconds' => 0, // No idle timeout - session expires only when browser closes
             'cookie_prefix' => '__Host-', // Requires Secure and Path=/
         ],
         'csrf' => [

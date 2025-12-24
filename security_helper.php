@@ -99,6 +99,7 @@ final class SecurityHelper
                 self::logout();
             }
         }
+        
         $_SESSION['__last_activity'] = time();
     }
 
@@ -275,12 +276,31 @@ final class SecurityHelper
 
     public static function logout(): void
     {
+        // Clear all session data
         $_SESSION = [];
+        
+        // Delete the session cookie
         if (ini_get('session.use_cookies')) {
             $p = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $p['path'] ?? '/', $p['domain'] ?? '', (bool)($p['secure'] ?? false), (bool)($p['httponly'] ?? true));
+            setcookie(
+                session_name(), 
+                '', 
+                time() - 42000, 
+                $p['path'] ?? '/', 
+                $p['domain'] ?? '', 
+                (bool)($p['secure'] ?? false), 
+                (bool)($p['httponly'] ?? true)
+            );
         }
+        
+        // Destroy the session
         session_destroy();
+        
+        // Clear session ID cookie if it exists
+        if (isset($_COOKIE[session_name()])) {
+            unset($_COOKIE[session_name()]);
+        }
+        
         header('Location: index.php');
         exit;
     }
