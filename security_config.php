@@ -8,20 +8,22 @@ return [
             ],
         ],
         'session' => [
-            'name' => 'ztal_session',
-            'lifetime' => 0, // Session expires when browser closes
+            'name' => 'secure_session',
+            'lifetime' => 0,
             'path' => '/',
-            'domain' => '',
-            'secure' => isset($_SERVER['HTTPS']), // Auto-detect HTTPS
+            'domain' => '', 
+            // DÜZELTME: Localhost (HTTP) ise false, HTTPS ise true olur.
+            'secure' => (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on'),
             'httponly' => true,
             'samesite' => 'Lax',
-            'regenerate_seconds' => 900, // 15 minutes
-            'idle_timeout_seconds' => 0, // No idle timeout - session expires only when browser closes
-            'cookie_prefix' => '__Host-', // Requires Secure and Path=/
+            'regenerate_seconds' => 900,
+            'idle_timeout_seconds' => 0,
+            // DÜZELTME: Localhost'ta __Host- prefix çalışmaz, boş bırakıyoruz.
+            'cookie_prefix' => '', 
         ],
         'csrf' => [
             'token_length' => 32,
-            'lifetime' => 7200, // 2 hours
+            'lifetime' => 7200,
         ],
         'vault' => [
             'key' => 'eff9ff5e82def6e985f1888ad6965d44',
@@ -29,10 +31,10 @@ return [
             'iv' => '4e32b6c1c09a3445',
         ],
         'rate_limiting' => [
-            'login_attempts' => 5, // Max login attempts
-            'login_window' => 300, // 5 minutes
-            'api_requests' => 100, // Max API requests
-            'api_window' => 60, // 1 minute
+            'login_attempts' => 5,
+            'login_window' => 300,
+            'api_requests' => 100,
+            'api_window' => 60,
         ],
         'headers' => [
             'xss_protection' => '1; mode=block',
@@ -44,3 +46,4 @@ return [
         ],
     ],
 ];
+?>

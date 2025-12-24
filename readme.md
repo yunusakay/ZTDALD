@@ -1,7 +1,7 @@
 # Zero Trust vs Legacy Database Application (ZTDALD)
 
 ## Proje Konusu
-Bu proje, Zero Trust güvenlik modelini ve geleneksel (Legacy) güvenlik yaklaşımlarını karşılaştıran bir parola kasası yönetim -sistemi uygulamasıdır. Kullanıcıların parola kayıtlarını güvenli bir şekilde yönetmelerini sağlayan iki farklı sistem içerir: Güvenli Zero Trust versiyonu ve güvenlik açıkları bulunan Legacy versiyonu. Bu uygulama, modern güvenlik pratikleri ile eski yöntemler arasındaki farkları göstermek amacıyla geliştirilmiştir.
+Bu proje, Zero Trust güvenlik modelini ve geleneksel (Legacy) güvenlik yaklaşımlarını karşılaştıran bir parola kasası yönetim sistemidir. Kullanıcıların parola kayıtlarını güvenli bir şekilde yönetmelerini sağlayan iki farklı sistem içerir: Güvenli Zero Trust versiyonu ve güvenlik açıkları bulunan Legacy versiyonu. Bu uygulama, modern güvenlik pratikleri ile eski yöntemler arasındaki farkları göstermek amacıyla geliştirilmiştir.
 
 ## Kurulum Kılavuzu
 
@@ -32,108 +32,4 @@ Bu proje, Zero Trust güvenlik modelini ve geleneksel (Legacy) güvenlik yaklaş
 3. XAMPP'i çalıştırın ve Apache/MySQL servislerini başlatın.
 4. `comprehensive_test.py` dosyasını çalıştırarak güvenlik testlerini gerçekleştirin: `python comprehensive_test.py`
 
-<<<<<<< HEAD
-CREATE TABLE IF NOT EXISTS zt_vault (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  service VARCHAR(100) NOT NULL,
-  username VARCHAR(100) NOT NULL,
-  password TEXT NOT NULL,
-  sensitivity VARCHAR(20) NOT NULL
-);
-
-INSERT INTO l_users (username, password, role) VALUES
-('admin', '1234', 'admin'),
-('tech',  '1234', 'tech'),
-('intern','1334','intern');
-
-INSERT INTO zt_users (username, password, role) VALUES
-('admin', '1234', 'admin'),
-('tech',  '1234', 'tech'),
-('intern','1234','intern');
-=======
 ## Projenin Yapısı
-```
-├── config.php              # Veritabanı bağlantı ayarları
-├── database.php            # Güvenli veritabanı sınıfı (Zero Trust için)
-├── security_config.php     # Güvenlik yapılandırması
-├── security_helper.php     # Güvenlik yardımcı fonksiyonları
-├── comprehensive_test.py   # Kapsamlı güvenlik testleri
-├── security_test.py        # Ek güvenlik testleri
-├── sql.md                  # Veritabanı şeması
-├── example.md              # Örnek dokümantasyon
-├── L/                      # Legacy (Güvensiz) Sistem
-│   └── index.php           # Ana uygulama dosyası
-└── ZT/                     # Zero Trust (Güvenli) Sistem
-    └── index.php           # Ana uygulama dosyası
->>>>>>> 943124a4f1928fc90fad812b12536a6758a4e0d6
-```
-
-## Teknik Detaylar
-
-### Kullanılan Teknolojiler
-- **Backend**: PHP 7.4+, PDO (Veritabanı bağlantısı için)
-- **Veritabanı**: MySQL
-- **Frontend**: HTML, CSS, JavaScript (minimal)
-- **Test**: Python 3.8+, Requests kütüphanesi
-
-### Güvenlik Özellikleri
-
-#### Legacy Sistem (L/)
-- Temel oturum yönetimi
-- SQL injection açıkları
-- CSRF koruması yok
-- Güvenlik başlıkları uygulanmamış
-- Zayıf parola politikası
-
-#### Zero Trust Sistem (ZT/)
-- Güçlü oturum yönetimi ve zaman aşımı
-- CSRF koruması
-- Güvenlik başlıkları (CSP, HSTS, vb.)
-- Rol tabanlı erişim kontrolü
-- Şifreleme ve güvenli veri işleme
-- Düzenli oturum yenileme
-
-### Veritabanı Yapısı
-- `l_users` / `zt_users`: Kullanıcı bilgileri
-- `l_vault` / `zt_vault`: Parola kayıtları
-- Hassasiyet seviyeleri: LOW, MEDIUM, HIGH, CRITICAL
-
-### Test Senaryoları
-`comprehensive_test.py` dosyası aşağıdaki güvenlik testlerini gerçekleştirir:
-- SQL Injection saldırıları
-- CSRF saldırıları
-- Oturum yönetimi testleri
-- Yetkilendirme bypass testleri
-- Güvenlik başlıkları kontrolü
-
-## Kullanım
-
-### Legacy Sistem
-1. `http://localhost/ZTDALD/L/` adresine gidin
-2. Test kullanıcıları ile giriş yapın (admin/1, tech/1, intern/1)
-3. Parola kayıtları ekleyin, düzenleyin veya silin
-
-### Zero Trust Sistem
-1. `http://localhost/ZTDALD/ZT/` adresine gidin
-2. Aynı test kullanıcıları ile giriş yapın
-3. Güvenlik önlemlerinin aktif olduğunu göreceksiniz
-
-### Test Çalıştırma
-```bash
-python comprehensive_test.py
-```
-
-## Eğitim Amaçlı Kullanım
-Bu proje, aşağıdaki konularda eğitim amaçlı kullanılabilir:
-- Web uygulama güvenliği
-- Zero Trust mimarisi
-- Güvenlik açıkları ve exploit'ler
-- Güvenli kodlama pratikleri
-- PHP güvenlik en iyi uygulamaları
-
-## Katkıda Bulunma
-Bu proje eğitim amaçlıdır. Güvenlik araştırmaları ve eğitim materyali geliştirmek için katkıda bulunabilirsiniz.
-
-## Lisans
-Bu proje açık kaynak kodludur ve eğitim amaçlı kullanım için serbest bırakılmıştır.
-Yunus AKAY

@@ -5,7 +5,6 @@ header('Content-Type: text/plain');
 
 echo "=== Login Debug ===\n\n";
 
-// Test L users table
 echo "L Users table structure:\n";
 $users = $pdo->query("DESCRIBE l_users")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($users as $col) {
@@ -20,9 +19,8 @@ foreach ($sample_users as $user) {
 
 echo "\n=== Test Login Query ===\n";
 
-// Test the exact login query
-$test_user = 'admin'; // Change this to a known username
-$test_pass = 'admin'; // Change this to the correct password
+$test_user = 'admin';
+$test_pass = 'admin';
 
 echo "Testing login with user: $test_user, pass: $test_pass\n";
 
@@ -36,7 +34,6 @@ if ($user) {
 } else {
     echo "LOGIN FAILED!\n";
     
-    // Try to find the user
     $stmt = $pdo->prepare("SELECT * FROM l_users WHERE username = ?");
     $stmt->execute([$test_user]);
     $user_check = $stmt->fetch();
