@@ -201,6 +201,11 @@ final class SecurityHelper
             // Validate based on type
             $validatedValue = self::validateInput($value, $type, $rule);
 
+            if ($validatedValue !== null && isset($rule['in_array']) && !in_array($validatedValue, $rule['in_array'], true)) {
+                $errors[$field] = $rule['message'] ?? "Invalid value for $field";
+                continue;
+            }
+
             if ($validatedValue === null) {
                 $errors[$field] = $rule['message'] ?? "Invalid value for $field";
             } else {
